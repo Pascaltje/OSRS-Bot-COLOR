@@ -34,7 +34,7 @@ class NRBot(RuneLiteBot, metaclass=ABCMeta):
     #     Closes the bank interface.
     #     '''
     #     self.log_msg("Closing bank...")
-    #     self.mouse.move_to(self.win.bank_close_btn())
+        self.mouse.move_to(self.win.bank_close_btn())
     #     pag.click()
     #     time.sleep(1)
 

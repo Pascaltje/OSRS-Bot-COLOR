@@ -25,6 +25,7 @@ import utilities.runelite_cv as rcv
 from model.bot import Bot, BotStatus
 from utilities.geometry import Point, Rectangle, RuneLiteObject
 from utilities.window import Window
+import utilities.random_util as rd
 
 
 class RuneLiteWindow(Window):
@@ -234,6 +235,34 @@ class RuneLiteBot(Bot, metaclass=ABCMeta):
         if shapes := self.get_all_tagged_in_rect(self.win.game_view, color):
             shapes_sorted = sorted(shapes, key=RuneLiteObject.distance_from_rect_center)
             return shapes_sorted[0]
+        else:
+            return None
+
+    def get_random_tag(self, color: clr.Color) -> RuneLiteObject:
+        """
+        Finds the nearest outlined object of a particular color within the game view and returns it as a RuneLiteObject.
+        Args:
+            color: The clr.Color to search for.
+        Returns:
+            The random outline to as a RuneLiteObject, or None if none found.
+        """
+        if shapes := self.get_all_tagged_in_rect(self.win.game_view, color):
+            index = int(rd.fancy_normal_sample(0, len(shapes)-1))
+            return shapes[index]
+        else:
+            return None
+
+    def get_farthest_tag(self, color: clr.Color) -> RuneLiteObject:
+        """
+        Finds the farthest outlined object of a particular color within the game view and returns it as a RuneLiteObject.
+        Args:
+            color: The clr.Color to search for.
+        Returns:
+            The nearest outline to the character as a RuneLiteObject, or None if none found.
+        """
+        if shapes := self.get_all_tagged_in_rect(self.win.game_view, color):
+            shapes_sorted = sorted(shapes, key=RuneLiteObject.distance_from_rect_center)
+            return shapes_sorted[len(shapes_sorted)-1]
         else:
             return None
 

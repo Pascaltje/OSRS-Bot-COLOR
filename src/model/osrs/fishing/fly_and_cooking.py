@@ -22,7 +22,7 @@ class OSRSFLYCooking(OSRSBot, launcher.Launchable):
     def __init__(self):
         bot_title = "Fly Fisher"
         description = (
-            "This bot will fly fish, cook the fish, drop the fish repeat!"
+            "This bot will fly fish, cook the fish, drop the fish repeat! Mark the Fire Yellow, fhising spots CYAN"
         )
         super().__init__(bot_title=bot_title, description=description)
         self.state = BotState.FISHING
@@ -66,10 +66,13 @@ class OSRSFLYCooking(OSRSBot, launcher.Launchable):
         while time.time() - start_time < end_time and self._has_needed_items():
 
             if self.state == BotState.FISHING:
+                self.log_msg("DoFishing")
                 self.do_fishing()
             elif self.state == BotState.COOKING:
+                self.log_msg("DoCooking")
                 self.do_cooking()
             elif self.state == BotState.DROPPING:
+                self.log_msg("Dropping")
                 positions = self.api_morg.get_inv_item_indices(self.needed_items)
                 self.drop_all(skip_slots=positions)
                 self.state = BotState.FISHING

@@ -5,6 +5,8 @@ import random
 
 from model.osrs.osrs_bot import OSRSBot
 import utilities.game_launcher as launcher
+from model.osrs.puntil.pitem import PItem
+from model.osrs.puntil.puntil import PUNTIL
 from utilities.api.morg_http_client import MorgHTTPSocket
 from utilities.api.status_socket import StatusSocket
 import utilities.color as clr
@@ -13,12 +15,22 @@ import utilities.random_util as rd
 import pyautogui as pag
 
 
-class OSRSSmeltingJewelleryEdgeVill(OSRSBot, launcher.Launchable):
+class OSRSSmeltingJewelleryEdgeVill(OSRSBot):
     api_morg = MorgHTTPSocket()
     api_status = StatusSocket()
     state = -1
     needed_items = [309, 314]
     firstTime = True
+    crafting_item: PItem = PItem("", 0, [], "")
+    errorCount = 0
+
+    items = [
+        PItem("Gold ring", 1635, [2357, 1592], "Gold_bar"),
+        PItem("Gold amulet (u)", 2, [2357, 1595], "Gold_amulet_(u)"),
+    ]
+
+    # Convert the list of objects to a dictionary with the item names as keys
+    item_dict = {item.name: item for item in items}
 
     def __init__(self):
         bot_title = "Smelting jewellery Edgevill"
@@ -31,11 +43,15 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot, launcher.Launchable):
 
     def create_options(self):
         self.options_builder.add_slider_option("running_time", "How long to run (minutes)?", 1, 500)
+        self.options_builder.add_dropdown_option("craft_item", "What should i make?", ["Gold ring", "Gold amulet (u)"])
 
     def save_options(self, options: dict):
         for option in options:
             if option == "running_time":
                 self.running_time = options[option]
+            elif option == "craft_item":
+                self.crafting_item = self.item_dict[options[option]]
+                print(self.crafting_item)
             else:
                 self.log_msg(f"Unknown option: {option}")
                 print(
@@ -45,6 +61,11 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot, launcher.Launchable):
 
         self.log_msg(f"Running time: {self.running_time} minutes.")
         self.options_set = True
+
+    def __setup(self):
+        self.api_m = MorgHTTPSocket()
+        self.api_s = StatusSocket()
+        self.puntil = PUNTIL(self, self.api_m, self.api_s)
 
     def main_loop(self):
 
@@ -56,6 +77,8 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot, launcher.Launchable):
         start_time = time.time()
         end_time = self.running_time * 60
         while time.time() - start_time < end_time:
+            if self.errorCount > 10:
+                self.stop()
 
             self._wait_for_idle()
             if self.state == BotState.Banking:
@@ -73,9 +96,8 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot, launcher.Launchable):
         # 2357 gold bar
         # 1635 gold ring
         # 1592 ring mount
-        needed_items = [2357, 1592]
 
-        if self._check_needed_inventory_items(needed_items):
+        if self._check_needed_inventory_items(self.crafting_item.neededItems):
             self.log_msg("click furnace")
             furnace = self.get_nearest_tag(clr.BLUE)
             if furnace:
@@ -96,20 +118,20 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot, launcher.Launchable):
 
     def __press_smelt_item(self):
         if self.firstTime or rd.random_chance(0.3):
-            self.log_msg("try to click gold ring to smelt")
-            deposit_img = imsearch.BOT_IMAGES.joinpath("items", "Gold_ring.png")
+            self.log_msg("try to smelt " + self.crafting_item.name)
+            deposit_img = imsearch.BOT_IMAGES.joinpath("items", self.crafting_item.image + ".png")
             if deposit_img := imsearch.search_img_in_rect(deposit_img, self.win.game_view):
                 self.mouse.move_to(deposit_img.random_point())
                 time.sleep(0.1)
                 self.mouse.click()
                 time.sleep(0.1)
             else:
-                self.log_msg("Gold ring not found! :/ pressed space")
+                self.log_msg(self.crafting_item.name + " not found! :/ pressed space")
                 pag.press("space")
                 time.sleep(0.3)
                 if self.api_morg.get_is_player_idle():
                     self.log_msg("Crafting action failed! :(")
-                    self.stop()
+                    self.errorCount = self.errorCount+1
                 # self.__press_smelt_item()
         else:
             self.log_msg("press space to smelt")
@@ -128,26 +150,29 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot, launcher.Launchable):
             self._wait_for_idle()
             time.sleep(0.1)
             if not self.api_status.get_is_inv_empty():
-                self.__bank_deposit_all()
+                if not self.__bank_deposit_all():
+                    return False
                 time.sleep(0.2)
 
             items = ["Gold_bar_bank.png"]
-            if not self.api_morg.get_if_item_in_inv(1592):
-                items.insert(0, "Ring_mould_bank.png")
+            # if not self.api_morg.get_if_item_in_inv(1592):
+            #     items.insert(0, "Ring_mould_bank.png")
             self.__bank_withdraw_items(items)
             self.state = BotState.Smelting
 
             # consider bank as open
             # deposit all or deposit all rings
 
-    def __bank_deposit_all(self):
+    def __bank_deposit_all(self) -> bool:
         deposit_img = imsearch.BOT_IMAGES.joinpath("bank", "deposit_inventory.png")
         if deposit_img := imsearch.search_img_in_rect(deposit_img, self.win.game_view):
             self.mouse.move_to(deposit_img.random_point())
             self.mouse.click()
+            return True
         else:
             self.log_msg("Could not deposit items")
-            self.stop()
+            self.errorCount = self.errorCount + 1
+            return False
 
     def __bank_withdraw_items(self, items):
         for item in items:
