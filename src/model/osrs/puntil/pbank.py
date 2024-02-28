@@ -14,7 +14,7 @@ class PBANK:
         self.error_count = 0
 
     def bank_deposit_all(self, image="deposit_inventory.png") -> bool:
-        deposit_img = imsearch.BOT_IMAGES.joinpath("bank", "deposit_inventory.png")
+        deposit_img = imsearch.BOT_IMAGES.joinpath("bank", image)
         if deposit_img := imsearch.search_img_in_rect(deposit_img, self.bot.win.game_view):
             self.bot.mouse.move_to(deposit_img.random_point())
             self.bot.mouse.click()
@@ -25,7 +25,7 @@ class PBANK:
             return False
 
     def bank_deposit_loot(self) -> bool:
-        return self.bank_deposit_all(image="deposit_loot.png")
+        return self.bank_deposit_all()
 
     def bank_withdraw_items(self, items):
         for item in items:
