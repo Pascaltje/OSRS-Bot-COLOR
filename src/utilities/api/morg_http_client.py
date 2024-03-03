@@ -319,14 +319,14 @@ class MorgHTTPSocket:
         data = self.__do_get(endpoint=self.inv_endpoint)
         return len([item["id"] for item in data if item["id"] != -1]) == 28
 
-    def get_is_inv_empty(self) -> bool:
+    def get_is_inv_empty(self, number_of_slots=28) -> bool:
         """
         Checks if player's inventory is full.
         Returns:
                 True if the player's inventory is full, False otherwise.
         """
         data = self.__do_get(endpoint=self.inv_endpoint)
-        return len([item["id"] for item in data if item["id"] == -1]) == 28
+        return len([item["id"] for item in data if item["id"] == -1]) == number_of_slots
 
     def get_inv_item_indices(self, item_id: Union[List[int], int]) -> list:
         """
@@ -343,12 +343,38 @@ class MorgHTTPSocket:
         elif isinstance(item_id, list):
             return [i for i, inventory_slot in enumerate(data) if inventory_slot["id"] in item_id]
 
+    def get_inv_indices_except_ignore(self, ignore_id: Union[int, List[int]], ignore_duplicates: bool = True):
+        data = self.__do_get(endpoint=self.inv_endpoint)
+        seen_ids = set()  # Set to track seen IDs
+
+        if isinstance(ignore_id, int):
+            ignore_id = [ignore_id]  # Convert to list for uniform processing
+
+        ignore_id.append(-1)
+        if ignore_duplicates:
+            # Process each inventory slot, ignoring duplicates and specified IDs
+            result = []
+            for i, inventory_slot in enumerate(data):
+                slot_id = inventory_slot["id"]
+                if slot_id not in ignore_id and slot_id not in seen_ids:
+                    result.append(i)
+                    seen_ids.add(slot_id)  # Mark this ID as seen
+            return result
+        else:
+            # Original logic without ignoring duplicates
+            if isinstance(ignore_id, list):
+                return [i for i, inventory_slot in enumerate(data) if inventory_slot["id"] not in ignore_id]
+            else:
+                # This else block might be redundant due to earlier list conversion,
+                # but retained for clarity. Consider removing if ignore_id is always processed as a list.
+                return [i for i, inventory_slot in enumerate(data) if inventory_slot["id"] != ignore_id]
+
     def get_inv_item_stack_amount(self, item_id: Union[int, List[int]]) -> int:
         """
         For the given item ID, returns the total amount of that item in your inventory.
         This is only useful for items that stack (e.g. coins, runes, etc).
         Args:
-            id: The item ID to search for. If a list is passed, the first matching item will be used.
+            item_id: The item ID to search for. If a list is passed, the first matching item will be used.
                 This is useful for items that have multiple IDs (e.g. coins, coin pouches, etc.).
         Returns:
             The total amount of that item in your inventory.

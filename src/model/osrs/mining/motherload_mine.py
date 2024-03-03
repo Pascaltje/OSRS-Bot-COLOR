@@ -62,7 +62,7 @@ class POSRSMotherLoadMiner(OSRSBot):
         while time.time() - start_time < end_time:
             self.log_msg(f"main Loop")
 
-            if self.api_m.get_is_inv_empty():
+            if self.api_m.get_is_inv_empty(number_of_slots=27):
                 # When inventory is empty
                 if self.puntil.is_tag_visible(self.colorOrePickUp):
                     # Search for the orePickUp (Green color), when found click it (what if it is out of view? :/)
@@ -80,12 +80,22 @@ class POSRSMotherLoadMiner(OSRSBot):
                     self.deposit_ores()
 
     def mine_vein(self, mine_nearest=True):
-        self.click_and_wait_for_idle(self.colorVein, "Mining vein", "Vein not found, they can be not available",
-                                     click_nearest=mine_nearest)
-        self.puntil.wait_for_idle(min_idle_time=2)
+        if self.click_and_wait_for_idle(self.colorVein, "Mining vein", "Vein not found, they can be not available",
+                                     click_nearest=mine_nearest, mouse_over_text="Ore vein"):
+            self.puntil.wait_for_idle(min_idle_time=2)
+        elif not self.api_m.get_if_item_in_inv(ids.PAYDIRT):
+            self.click_and_wait_for_idle(self.colorVeinTile, "Walking to helper tile",
+                                         "helper tile not found, they can be not available", click_nearest=False)
 
     def dump_dirt(self):
-        if self.puntil.click_tag(self.colorOreHopper, "Error clicking/ finding the hopper"):
+        if self.puntil.click_tag(self.colorOreHopper, "Error clicking/ finding the hopper", mouse_over_text="Hopper",
+                                 mouse_over_color=clr.OFF_CYAN):
+            if "The sack is getting full." in self.api_m.get_latest_chat_message():
+                self.log_msg(self.api_m.get_latest_chat_message())
+                keep = self.api_m.get_inv_item_indices(ids.pickaxes)
+                self.drop_all(skip_slots=keep)
+                self.pick_up_ore()
+
             self.log_msg("Dumping ore into hopper")
             self.take_break(1, 3)
             self.puntil.wait_for_idle()
@@ -101,11 +111,13 @@ class POSRSMotherLoadMiner(OSRSBot):
         self.click_and_wait_for_idle(self.colorDepositBox, "Deposit ores to bank",
                                      "Error clicking/ finding the deposit box")
         self.puntil.wait_for_idle()
-        self.pbank.bank_deposit_loot()
+        self.pbank.bank_deposit_all_except(ids.pickaxes)
         self.pbank.close()
 
-    def click_and_wait_for_idle(self, color, message, error_message, click_nearest=rd.random_chance(0.6)):
-        if self.puntil.click_tag(color, error_message, click_nearest):
+    def click_and_wait_for_idle(self, color, message, error_message, mouse_over_text=None, mouse_over_color=None,
+                                click_nearest=rd.random_chance(0.6)):
+        if self.puntil.click_tag(color, error_message, click_nearest, mouse_over_text=mouse_over_text,
+                                 mouse_over_color=mouse_over_color):
             self.log_msg(message)
             self.take_break(1, 3)
             self.puntil.wait_for_idle()

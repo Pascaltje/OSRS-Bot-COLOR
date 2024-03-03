@@ -25,14 +25,18 @@ class PUNTIL:
     def search_tag(self, color: clr.Color) -> bool:
         tries = 0
         while tries < 5:
+            tries += 1
             h = int(rd.fancy_normal_sample(-180, 180))
-            self.bot.move_camera(horizontal=h)
-            time.sleep(1)
-            if self.is_tag_visible(color):
-                return True
+            if h != 0:
+                self.bot.move_camera(horizontal=h)
+                time.sleep(1)
+                if self.is_tag_visible(color):
+                    return True
+            else:
+                tries -= 1
         return False
 
-    def click_tag(self, color: clr.Color, error_msg: str, weight=1, click_nearest=True) -> bool:
+    def click_tag(self, color: clr.Color, error_msg: str, weight=1, click_nearest=True, mouse_over_text=None, mouse_over_color=None) -> bool:
         if not self.is_tag_visible(color):
             if not self.search_tag(color):
                 return False
@@ -44,6 +48,10 @@ class PUNTIL:
         if obj:
             self.reset_simple_error()
             self.bot.mouse.move_to(obj.random_point())
+            if mouse_over_text:
+                if not self.bot.mouseover_text(contains=[mouse_over_text]):
+                    return False
+
             self.bot.mouse.click()
             time.sleep(1)  # sleeping 1 second to make sure something is happing before checking agian.
             return True

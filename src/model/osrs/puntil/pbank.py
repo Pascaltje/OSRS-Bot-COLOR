@@ -27,6 +27,18 @@ class PBANK:
     def bank_deposit_loot(self) -> bool:
         return self.bank_deposit_all()
 
+    def bank_deposit_all_except(self, keep_list):
+        items = self.api_m.get_inv_indices_except_ignore(keep_list)
+        for item in items:
+            self._click_inv_slot(item)
+
+    def _click_inv_slot(self, slot):
+        spot = self.bot.win.inventory_slots[slot].random_point()
+        self.bot.mouse.move_to(spot)
+        time.sleep(0.1)
+        self.bot.mouse.click()
+        time.sleep(0.1)
+
     def bank_withdraw_items(self, items):
         for item in items:
             self.bot.log_msg("Try to withdraw " + item)
