@@ -17,6 +17,7 @@ from .theiving.pick_pocket_npc import POSRSPICKPOCKET
 from .theiving.stall_power import POSRSPICKSTALL
 
 from .fletching.making_headless_arrow import POSRSHEADLESSARROW
+from .fletching.making_bows import POSRSMAKEBOWS
 
 from .money_making.make_admiral_pies import POSRSMAKEADMIRALPIES
 from .money_making.items_maker import POSRSITEMSMAKE
