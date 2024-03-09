@@ -111,7 +111,10 @@ class POSRSMotherLoadMiner(OSRSBot):
         self.click_and_wait_for_idle(self.colorDepositBox, "Deposit ores to bank",
                                      "Error clicking/ finding the deposit box")
         self.puntil.wait_for_idle()
-        self.pbank.bank_deposit_all_except(ids.pickaxes)
+        if self.api_m.get_if_item_in_inv(ids.pickaxes):
+            self.pbank.bank_deposit_all_except(ids.pickaxes)
+        else:
+            self.pbank.bank_deposit_all()
         self.pbank.close()
 
     def click_and_wait_for_idle(self, color, message, error_message, mouse_over_text=None, mouse_over_color=None,

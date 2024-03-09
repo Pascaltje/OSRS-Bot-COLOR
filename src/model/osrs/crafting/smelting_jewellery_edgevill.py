@@ -1,10 +1,8 @@
 import time
-from abc import ABC
 from enum import Enum
-import random
 
 from model.osrs.osrs_bot import OSRSBot
-import utilities.game_launcher as launcher
+import utilities.api.item_ids as ids
 from model.osrs.puntil.pitem import PItem
 from model.osrs.puntil.puntil import PUNTIL
 from utilities.api.morg_http_client import MorgHTTPSocket
@@ -21,12 +19,13 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot):
     state = -1
     needed_items = [309, 314]
     firstTime = True
-    crafting_item: PItem = PItem("", 0, [], "")
+    crafting_item: PItem = PItem("", 0, "", [], [])
     errorCount = 0
 
     items = [
-        PItem("Gold ring", 1635, [2357, 1592], "Gold_bar"),
-        PItem("Gold amulet (u)", 2, [2357, 1595], "Gold_amulet_(u)"),
+        PItem("Gold ring", ids.GOLD_RING, "Gold_ring", [2357, 1592], ["Gold_bar", "Ring_mould"]),
+        PItem("Gold amulet (u)", ids.GOLD_AMULET_U, "Gold_amulet_(u)", [2357, 1595], ["Gold_bar", "Amulet_mould"]),
+        PItem("Bronze bar", ids.BRONZE_BAR, "Bronze_bar", [ids.COPPER_ORE, ids.TIN_ORE], ["Copper_ore", "Tin_ore"]),
     ]
 
     # Convert the list of objects to a dictionary with the item names as keys
@@ -42,8 +41,10 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot):
         self.running_time: int = 30
 
     def create_options(self):
+        keys = list(self.item_dict.keys())
+        print(keys)
         self.options_builder.add_slider_option("running_time", "How long to run (minutes)?", 1, 500)
-        self.options_builder.add_dropdown_option("craft_item", "What should i make?", ["Gold ring", "Gold amulet (u)"])
+        self.options_builder.add_dropdown_option("craft_item", "What should i make?", keys)
 
     def save_options(self, options: dict):
         for option in options:
@@ -97,7 +98,7 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot):
         # 1635 gold ring
         # 1592 ring mount
 
-        if self._check_needed_inventory_items(self.crafting_item.neededItems):
+        if self._check_needed_inventory_items(self.crafting_item.needed_item_ids):
             self.log_msg("click furnace")
             furnace = self.get_nearest_tag(clr.BLUE)
             if furnace:
@@ -154,14 +155,8 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot):
                     return False
                 time.sleep(0.2)
 
-            items = ["Gold_bar_bank.png"]
-            # if not self.api_morg.get_if_item_in_inv(1592):
-            #     items.insert(0, "Ring_mould_bank.png")
-            self.__bank_withdraw_items(items)
+            self.__bank_withdraw_items(self.crafting_item.needed_item_images)
             self.state = BotState.Smelting
-
-            # consider bank as open
-            # deposit all or deposit all rings
 
     def __bank_deposit_all(self) -> bool:
         deposit_img = imsearch.BOT_IMAGES.joinpath("bank", "deposit_inventory.png")
@@ -177,7 +172,7 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot):
     def __bank_withdraw_items(self, items):
         for item in items:
             self.log_msg("Try to withdraw " + item)
-            deposit_img = imsearch.BOT_IMAGES.joinpath("items", item)
+            deposit_img = imsearch.BOT_IMAGES.joinpath("items", item + "_bank.png")
             if deposit_img := imsearch.search_img_in_rect(deposit_img, self.win.game_view):
                 self.mouse.move_to(deposit_img.random_point())
                 time.sleep(0.1)

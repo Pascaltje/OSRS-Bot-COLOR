@@ -326,7 +326,8 @@ class MorgHTTPSocket:
                 True if the player's inventory is full, False otherwise.
         """
         data = self.__do_get(endpoint=self.inv_endpoint)
-        return len([item["id"] for item in data if item["id"] == -1]) == number_of_slots
+        return len([item["id"] for item in data if item["id"] == -1]) >= number_of_slots
+
 
     def get_inv_item_indices(self, item_id: Union[List[int], int]) -> list:
         """
