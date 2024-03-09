@@ -25,7 +25,7 @@ class POSRSMAKEBOWS(OSRSBot):
         self.knife = ids.KNIFE
         self.logs = ids.MAPLE_LOGS
         self.logs_image = "Maple_logs_bank.png"
-        self.action = 3
+        self.action = "3"
 
     def create_options(self):
         self.options_builder.add_slider_option("running_time", "How long to run (minutes)?", 1, 500)
@@ -78,7 +78,7 @@ class POSRSMAKEBOWS(OSRSBot):
 
             self._click_spots_random_order(spots)
 
-            time.sleep(rd.fancy_normal_sample(0.3, 2))
+            time.sleep(rd.fancy_normal_sample(0.5, 2))
             pag.press(self.action)
             if rd.random_chance(.14):
                 self.log_msg("Take long break")
@@ -88,6 +88,8 @@ class POSRSMAKEBOWS(OSRSBot):
 
     def _do_bank(self):
         if self.puntil.click_tag(clr.YELLOW, "Bank not found...", 5):
+            time.sleep(0.3)
+            self.puntil.wait_for_idle()
             self.pbank.bank_deposit_all_except(self.knife)
             self.pbank.bank_withdraw_items([self.logs_image])
             self.pbank.close()
