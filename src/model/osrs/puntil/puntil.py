@@ -49,6 +49,7 @@ class PUNTIL:
             self.reset_simple_error()
             self.bot.mouse.move_to(obj.random_point())
             if mouse_over_text:
+                time.sleep(0.2)
                 if not self.bot.mouseover_text(contains=[mouse_over_text]):
                     return False
 
