@@ -62,7 +62,11 @@ class POSRSMotherLoadMiner(OSRSBot):
         while time.time() - start_time < end_time:
             self.log_msg(f"main Loop")
 
-            if self.api_m.get_is_inv_empty(number_of_slots=27):
+            min_slots = 28
+            if self.api_m.get_if_item_in_inv(ids.pickaxes):
+                min_slots = 27
+
+            if self.api_m.get_is_inv_empty(number_of_slots=min_slots):  # this statement is evil
                 # When inventory is empty
                 if self.puntil.is_tag_visible(self.colorOrePickUp):
                     # Search for the orePickUp (Green color), when found click it (what if it is out of view? :/)
@@ -81,7 +85,7 @@ class POSRSMotherLoadMiner(OSRSBot):
 
     def mine_vein(self, mine_nearest=True):
         if self.click_and_wait_for_idle(self.colorVein, "Mining vein", "Vein not found, they can be not available",
-                                     click_nearest=mine_nearest, mouse_over_text="Ore vein"):
+                                        click_nearest=mine_nearest, mouse_over_text="Ore vein"):
             self.puntil.wait_for_idle(min_idle_time=2)
         elif not self.api_m.get_if_item_in_inv(ids.PAYDIRT):
             self.click_and_wait_for_idle(self.colorVeinTile, "Walking to helper tile",

@@ -25,6 +25,7 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot):
     items = [
         PItem("Gold ring", ids.GOLD_RING, "Gold_ring", [2357, 1592], ["Gold_bar", "Ring_mould"]),
         PItem("Gold amulet (u)", ids.GOLD_AMULET_U, "Gold_amulet_(u)", [2357, 1595], ["Gold_bar", "Amulet_mould"]),
+        PItem("Gold necklace", ids.GOLD_NECKLACE, "Gold_necklace", [ids.GOLD_BAR, ids.NECKLACE_MOULD], ["Gold_bar", "Necklace_mould"]),
         PItem("Bronze bar", ids.BRONZE_BAR, "Bronze_bar", [ids.COPPER_ORE, ids.TIN_ORE], ["Copper_ore", "Tin_ore"]),
     ]
 
