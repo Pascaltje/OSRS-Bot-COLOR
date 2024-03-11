@@ -29,11 +29,21 @@ class POSRSMAKEBOWS(OSRSBot):
 
     def create_options(self):
         self.options_builder.add_slider_option("running_time", "How long to run (minutes)?", 1, 500)
+        self.options_builder.add_dropdown_option("craft_item", "What should i make?", ["Yew Longbows", "Maple Longbows"])
 
     def save_options(self, options: dict):
         for option in options:
             if option == "running_time":
                 self.running_time = options[option]
+            elif option == "craft_item":
+                if options[option] == "Yew Longbows":
+                    self.logs = ids.YEW_LOGS
+                    self.logs_image = "Yew_logs_bank.png"
+                    self.action = "3"
+                elif options[option] == "Maple Longbows":
+                    self.logs = ids.MAPLE_LOGS
+                    self.logs_image = "Maple_logs_bank.png"
+                    self.action = "3"
             else:
                 self.log_msg(f"Unknown option: {option}")
                 print(
