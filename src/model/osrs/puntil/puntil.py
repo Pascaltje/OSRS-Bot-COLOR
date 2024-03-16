@@ -81,7 +81,6 @@ class PUNTIL:
                 self.wait_for_idle(location_next_action, min_idle_time)
 
     def check_needed_items(self, items: list[int]) -> bool:
-        print(self.api_m.get_if_item_in_inv(items))
         if self.api_m.get_if_item_in_inv(items):
             return True
 

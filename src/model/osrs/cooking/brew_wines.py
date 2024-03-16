@@ -15,7 +15,7 @@ import utilities.random_util as rd
 
 class POSRSBREWWINES(OSRSBot):
     def __init__(self):
-        title = "Brew Wines"
+        title = "Pineapple pizza "
         description = "Take 14 jug of water with 14 grapes to brew wine. Tag bank with yellow."
         super().__init__(bot_title=title, description=description)
         self.running_time = 1
@@ -25,7 +25,7 @@ class POSRSBREWWINES(OSRSBot):
         self.error_count = 0
         self.puntil = PUNTIL(self, self.api_m)
         self.pbank = PBANK(self, self.api_m)
-        self.needables = [ids.JUG_OF_WATER, ids.GRAPES]
+        self.needables = [ids.PINEAPPLE_RING, ids.PLAIN_PIZZA]
 
     def create_options(self):
         self.options_builder.add_slider_option("running_time", "How long to run (minutes)?", 1, 500)
@@ -55,6 +55,7 @@ class POSRSBREWWINES(OSRSBot):
         end_time = self.running_time * 60
         time.sleep(1)
         while time.time() - start_time < end_time:
+            self.log_msg("is Idle: " + str(self.api_m.get_is_player_idle()))
             if self.api_m.get_is_player_idle():
                 if self.puntil.check_needed_items(self.needables):
                     self._do_craft()
@@ -64,8 +65,8 @@ class POSRSBREWWINES(OSRSBot):
                 self.take_break(5, 30)
 
     def _do_craft(self):
-        buckets = self.api_m.get_inv_item_indices(ids.JUG_OF_WATER)
-        grapes = self.api_m.get_inv_item_indices(ids.GRAPES)
+        buckets = self.api_m.get_inv_item_indices(ids.PLAIN_PIZZA)
+        grapes = self.api_m.get_inv_item_indices(ids.PINEAPPLE_RING)
 
         if len(buckets) > 0 and len(grapes) > 0:
             bucketIndex = buckets[random.randint(0, len(buckets) - 1)]
@@ -79,18 +80,17 @@ class POSRSBREWWINES(OSRSBot):
 
             time.sleep(rd.fancy_normal_sample(1.5, 5))
             pag.press("space")
-            if rd.random_chance(.14):
-                self.log_msg("Take long break")
-                self.take_break(20, 90)
-            else:
-                self.take_break(10, 15)
+            self.take_break(25, 30)
+        else:
+            self.log_msg("Stopping bot")
+            self.stop()
 
     def _do_bank(self):
         if self.puntil.click_tag(clr.YELLOW, "Bank not found...", 5):
             self.puntil.wait_for_idle()
             if not self.api_s.get_is_inv_empty():
                 self.pbank.bank_deposit_all()
-            withdraw_items = ["Jug_of_water_bank.png", "Grapes_bank.png"]
+            withdraw_items = ["Pineapple_ring_bank.png", "Plain_pizza_bank.png"]
             if rd.random_chance(.45):
                 withdraw_items.reverse()
             self.pbank.bank_withdraw_items(withdraw_items)
