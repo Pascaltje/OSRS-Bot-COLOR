@@ -60,6 +60,7 @@ class OSRSFLYCooking(OSRSBot, launcher.Launchable):
         self.mouse.move_to(self.win.cp_tabs[3].random_point())
         self.mouse.click()
 
+        self.state = BotState.FISHING
         # Main loop
         start_time = time.time()
         end_time = self.running_time * 60
@@ -113,11 +114,11 @@ class OSRSFLYCooking(OSRSBot, launcher.Launchable):
                 self.mouse.click()
                 time.sleep(0.1)
                 self.mouse.move_to(cooking_range.random_point())
-                time.sleep(0.1)
+                time.sleep(0.3)
                 if not self.mouseover_text(contains="Fire"):
                     return
                 self.mouse.click()
-                time.sleep(1)
+                time.sleep(3)
                 self._wait_for_idle()
                 pag.press("space")
                 self._wait_for_idle(self.win.game_view.random_point())
