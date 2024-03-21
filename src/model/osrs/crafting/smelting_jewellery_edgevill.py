@@ -28,6 +28,8 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot):
         PItem("Gold necklace", ids.GOLD_NECKLACE, "Gold_necklace", [ids.GOLD_BAR, ids.NECKLACE_MOULD], ["Gold_bar", "Necklace_mould"]),
         PItem("Bronze bar", ids.BRONZE_BAR, "Bronze_bar", [ids.COPPER_ORE, ids.TIN_ORE], ["Copper_ore", "Tin_ore"]),
         PItem("Ruby necklace", ids.RUBY_NECKLACE, "Ruby_necklace", [ids.GOLD_BAR, ids.RUBY, ids.NECKLACE_MOULD], ["Gold_bar", "Ruby", "Necklace_mould"]),
+        PItem("Emerald Bracelet", ids.EMERALD_BRACELET, "Emerald_bracelet", [ids.GOLD_BAR, ids.EMERALD, ids.BRACELET_MOULD], ["Gold_bar", "Emerald", "Bracelet_mould"]),
+
     ]
 
     # Convert the list of objects to a dictionary with the item names as keys
