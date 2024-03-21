@@ -114,7 +114,7 @@ class OSRSFLYCooking(OSRSBot, launcher.Launchable):
                 self.mouse.click()
                 time.sleep(0.1)
                 self.mouse.move_to(cooking_range.random_point())
-                time.sleep(0.3)
+                time.sleep(1)
                 if not self.mouseover_text(contains="Fire"):
                     return
                 self.mouse.click()
