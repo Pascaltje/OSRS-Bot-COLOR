@@ -44,6 +44,10 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot):
         super().__init__(bot_title=bot_title, description=description)
         self.state = BotState.Smelting
         self.running_time: int = 30
+        self.api_m = MorgHTTPSocket()
+        self.api_s = StatusSocket()
+        self.puntil = PUNTIL(self, self.api_m)
+        self.pbank = PBANK(self, self.api_m)
 
     def create_options(self):
         keys = list(self.item_dict.keys())
@@ -69,10 +73,8 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot):
         self.options_set = True
 
     def __setup(self):
-        self.api_m = MorgHTTPSocket()
-        self.api_s = StatusSocket()
-        self.puntil = PUNTIL(self, self.api_m)
-        self.pbank = PBANK(self, self.api_m)
+        self.state = BotState.Smelting
+        self.running_time: int = 30
 
     def main_loop(self):
 
@@ -156,13 +158,11 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot):
             self.log_msg("Wait for bank opens")
             self._wait_for_idle()
             time.sleep(0.1)
-            self.pbank.bank_deposit_all_except(self.item.needed_item_ids)
-
-            #
-            # if not self.api_status.get_is_inv_empty():
-            #     if not self.__bank_deposit_all():
-            #         return False
-            #     time.sleep(0.2)
+            # self.pbank.bank_deposit_all_except(self.item.needed_item_ids)
+            if not self.api_status.get_is_inv_empty():
+                if not self.__bank_deposit_all():
+                    return False
+                time.sleep(0.2)
 
             self.__bank_withdraw_items(self.crafting_item.needed_item_images)
             self.state = BotState.Smelting
