@@ -3,6 +3,7 @@ from enum import Enum
 
 from model.osrs.osrs_bot import OSRSBot
 import utilities.api.item_ids as ids
+from model.osrs.puntil.pbank import PBANK
 from model.osrs.puntil.pitem import PItem
 from model.osrs.puntil.puntil import PUNTIL
 from utilities.api.morg_http_client import MorgHTTPSocket
@@ -70,7 +71,8 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot):
     def __setup(self):
         self.api_m = MorgHTTPSocket()
         self.api_s = StatusSocket()
-        self.puntil = PUNTIL(self, self.api_m, self.api_s)
+        self.puntil = PUNTIL(self, self.api_m)
+        self.pbank = PBANK(self, self.api_m)
 
     def main_loop(self):
 
@@ -154,10 +156,13 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot):
             self.log_msg("Wait for bank opens")
             self._wait_for_idle()
             time.sleep(0.1)
-            if not self.api_status.get_is_inv_empty():
-                if not self.__bank_deposit_all():
-                    return False
-                time.sleep(0.2)
+            self.pbank.bank_deposit_all_except(self.item.needed_item_ids)
+
+            #
+            # if not self.api_status.get_is_inv_empty():
+            #     if not self.__bank_deposit_all():
+            #         return False
+            #     time.sleep(0.2)
 
             self.__bank_withdraw_items(self.crafting_item.needed_item_images)
             self.state = BotState.Smelting
