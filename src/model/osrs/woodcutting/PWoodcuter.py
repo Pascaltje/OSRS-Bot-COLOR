@@ -95,11 +95,9 @@ class POSNRWoodcutting(OSRSBot):
             if self._click_tag(clr.GREEN, "Tree not found, needs to respawn??", 1):
                 time.sleep(1)  # sleeping 1 second to make sure something is happing before checking agian.
             # else:
-                #  tree not found
-                #  is bank open?
-                #   Close bank (esc)
-
-
+            #  tree not found
+            #  is bank open?
+            #   Close bank (esc)
 
     def _pickup_loot(self) -> bool:
         self.log_msg("Pickup loot on the ground")
@@ -118,8 +116,8 @@ class POSNRWoodcutting(OSRSBot):
                     banked_ids.append(item["id"])
                     self._click_inv_slot(item["index"])
             time.sleep(.3)
-            # self.log_msg("Close bank")
-            # pag.press("esc")
+            self.log_msg("Close bank")
+            pag.press("esc")
 
     def _click_inv_slot(self, slot: int, text="All"):
         self.mouse.move_to(self.win.inventory_slots[slot].random_point())
