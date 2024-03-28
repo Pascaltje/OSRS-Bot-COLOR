@@ -1,17 +1,18 @@
 import time
 from enum import Enum
 
-from model.osrs.osrs_bot import OSRSBot
+import pyautogui as pag
+
 import utilities.api.item_ids as ids
+import utilities.color as clr
+import utilities.imagesearch as imsearch
+import utilities.random_util as rd
+from model.osrs.osrs_bot import OSRSBot
 from model.osrs.puntil.pbank import PBANK
 from model.osrs.puntil.pitem import PItem
 from model.osrs.puntil.puntil import PUNTIL
 from utilities.api.morg_http_client import MorgHTTPSocket
 from utilities.api.status_socket import StatusSocket
-import utilities.color as clr
-import utilities.imagesearch as imsearch
-import utilities.random_util as rd
-import pyautogui as pag
 
 
 class OSRSSmeltingJewelleryEdgeVill(OSRSBot):
@@ -29,6 +30,7 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot):
         PItem("Gold necklace", ids.GOLD_NECKLACE, "Gold_necklace", [ids.GOLD_BAR, ids.NECKLACE_MOULD], ["Gold_bar", "Necklace_mould"]),
         PItem("Bronze bar", ids.BRONZE_BAR, "Bronze_bar", [ids.COPPER_ORE, ids.TIN_ORE], ["Copper_ore", "Tin_ore"]),
         PItem("Ruby necklace", ids.RUBY_NECKLACE, "Ruby_necklace", [ids.GOLD_BAR, ids.RUBY, ids.NECKLACE_MOULD], ["Gold_bar", "Ruby", "Necklace_mould"]),
+        PItem("Diamond necklace", ids.DIAMOND_NECKLACE, "Diamond_necklace", [ids.GOLD_BAR, ids.DIAMOND, ids.NECKLACE_MOULD], ["Gold_bar", "Diamond", "Necklace_mould"]),
         PItem("Emerald Bracelet", ids.EMERALD_BRACELET, "Emerald_bracelet", [ids.GOLD_BAR, ids.EMERALD, ids.BRACELET_MOULD], ["Gold_bar", "Emerald", "Bracelet_mould"]),
 
     ]
@@ -140,7 +142,7 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot):
                 time.sleep(0.3)
                 if self.api_morg.get_is_player_idle():
                     self.log_msg("Crafting action failed! :(")
-                    self.errorCount = self.errorCount+1
+                    self.errorCount = self.errorCount + 1
                 # self.__press_smelt_item()
         else:
             self.log_msg("press space to smelt")
