@@ -1,9 +1,9 @@
 import time
+
 import utilities.color as clr
-from utilities.api.morg_http_client import MorgHTTPSocket
-from utilities.api.status_socket import StatusSocket
-from model.osrs.osrs_bot import OSRSBot
 import utilities.random_util as rd
+from model.osrs.osrs_bot import OSRSBot
+from utilities.api.morg_http_client import MorgHTTPSocket
 
 
 class PUNTIL:
@@ -36,7 +36,8 @@ class PUNTIL:
                 tries -= 1
         return False
 
-    def click_tag(self, color: clr.Color, error_msg: str, weight=1, click_nearest=True, mouse_over_text=None, mouse_over_color=None) -> bool:
+    def click_tag(self, color: clr.Color, error_msg: str, weight=1, click_nearest=True, mouse_over_text=None,
+                  mouse_over_color=None) -> bool:
         if not self.is_tag_visible(color):
             if not self.search_tag(color):
                 return False

@@ -6,7 +6,6 @@ import pyautogui as pag
 import pytweening
 from pyclick import HumanCurve
 
-import utilities.debug as debug
 import utilities.imagesearch as imsearch
 from utilities.geometry import Point, Rectangle
 from utilities.random_util import truncated_normal_sample
@@ -43,16 +42,16 @@ class Mouse:
 
         start_x, start_y = pag.position()
         for curve_x, curve_y in HumanCurve(
-            (start_x, start_y),
-            (dest_x, dest_y),
-            offsetBoundaryX=offsetBoundaryX,
-            offsetBoundaryY=offsetBoundaryY,
-            knotsCount=knotsCount,
-            distortionMean=distortionMean,
-            distortionStdev=distortionStdev,
-            distortionFrequency=distortionFrequency,
-            tween=tween,
-            targetPoints=mouseSpeed,
+                (start_x, start_y),
+                (dest_x, dest_y),
+                offsetBoundaryX=offsetBoundaryX,
+                offsetBoundaryY=offsetBoundaryY,
+                knotsCount=knotsCount,
+                distortionMean=distortionMean,
+                distortionStdev=distortionStdev,
+                distortionFrequency=distortionFrequency,
+                tween=tween,
+                targetPoints=mouseSpeed,
         ).points:
             pag.moveTo((curve_x, curve_y))
             start_x, start_y = curve_x, curve_y
@@ -175,6 +174,14 @@ class Mouse:
         else:
             raise ValueError("Invalid mouse speed. Try 'slowest', 'slow', 'medium', 'fast', or 'fastest'.")
         return round(truncated_normal_sample(min, max))
+
+    def drag(self, start_pos: tuple, end_pos: tuple):
+        self.move_to(start_pos)
+        time.sleep(0.2)
+        pag.mouseDown()
+        self.move_to(end_pos)
+        time.sleep(0.1)
+        pag.mouseUp()
 
 
 if __name__ == "__main__":
