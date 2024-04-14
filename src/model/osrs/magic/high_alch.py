@@ -2,16 +2,16 @@ import random
 import time
 
 import utilities.api.item_ids as ids
-import utilities.game_launcher as launcher
 import utilities.imagesearch as imsearch
 import utilities.random_util as rd
 from model.osrs.osrs_bot import OSRSBot
+from model.osrs.puntil.control_panel_tab import ControlPanelTab
 from model.osrs.puntil.puntil import PUNTIL
 from utilities.api.morg_http_client import MorgHTTPSocket
 from utilities.geometry import Rectangle
 
 
-class OSRSHIGHALCH(OSRSBot, launcher.Launchable):
+class OSRSHIGHALCH(OSRSBot):
     api_morg = MorgHTTPSocket()
 
     def __init__(self):
@@ -20,7 +20,7 @@ class OSRSHIGHALCH(OSRSBot, launcher.Launchable):
             "High alch every item in the inventory, except coins en nature runes."
         )
         super().__init__(bot_title=bot_title, description=description)
-        self.running_time: int = 30
+        self.running_time: int = random.randint(45, 200)
         self.item_index: int = 0
 
         self.current_item_id = -1
@@ -31,21 +31,19 @@ class OSRSHIGHALCH(OSRSBot, launcher.Launchable):
         self.ignore_items_list.append(ids.NATURE_RUNE)
 
         self.spell_location = None
-        self.spell_item_rectangle: Rectangle | None = None
+        self.spell_item_rectangle: Rectangle | None = None  # The overlap between spell and inventory slot
         self.click_pos = None
         self.click_pos_times = random.randint(0, 35)
         self.click_pos_count = 0
 
     def create_options(self):
         self.options_builder.add_slider_option("running_time", "How long to run (minutes)?", 1, 500)
-        self.options_builder.add_text_edit_option("item_index", "Item index to place the items to high alchemy")
 
     def save_options(self, options: dict):
+        self.options_set = True
         for option in options:
             if option == "running_time":
                 self.running_time = options[option]
-            elif option == "item_index":
-                self.item_index = int(options[option])
             else:
                 self.log_msg(f"Unknown option: {option}")
                 print(
@@ -54,7 +52,6 @@ class OSRSHIGHALCH(OSRSBot, launcher.Launchable):
                 return
 
         self.log_msg(f"Running time: {self.running_time} minutes.")
-        self.options_set = True
 
     def setup(self):
         self.spell_location = None
@@ -73,9 +70,10 @@ class OSRSHIGHALCH(OSRSBot, launcher.Launchable):
         end_time = self.running_time * 60
         while time.time() - start_time < end_time:
             self.has_nature_rune()
+            self.setup_high_alchemy_spot()
             isStarting = self._set_item_in_alch_spot()
             self.set_click_pos(force=isStarting)
-            self.do_high_alch(isStarting)
+            self.do_high_alch()
 
             time.sleep(0.1)
             self.update_progress((time.time() - start_time) / end_time)
@@ -91,7 +89,7 @@ class OSRSHIGHALCH(OSRSBot, launcher.Launchable):
             self.stop()
         else:
             if self.item_index not in items:
-                self.select_inv()
+                self.select_inv_tab()
                 self.log_msg("Drag item to alch spot")
                 # move item to alch spot
                 index = items[random.randint(0, len(items) - 1)]
@@ -100,24 +98,18 @@ class OSRSHIGHALCH(OSRSBot, launcher.Launchable):
             else:
                 return False
 
-    def do_high_alch(self, start: bool = False):
-        # when start is true, start from beginning.
-        if start:
-            # 1. select magic book
-            self.mouse.move_to(self.win.cp_tabs[6].random_point())
-            self.mouse.click()
-            time.sleep(.5)
-            self.setup_high_alchemy_spot()
-
+    def do_high_alch(self):
+        self.select_magic_tab()
         self.mouse.move_to(self.click_pos)
         time.sleep(0.1)
-        self.mouse.click()
+        self.mouse.click()  # Click spell in magic book
+        self.puntil.wait_for_selected_tab(ControlPanelTab.inventory)
         time.sleep(0.1)
         self.set_click_pos()
         self.click_pos_count = self.click_pos_count + 1
         # 3. klik item
-        self.mouse.move_to(self.click_pos)  # self.win.inventory_slots[self.item_index].random_point()
-        self.mouse.click()
+        self.mouse.move_to(self.click_pos)
+        self.mouse.click()  # Click item in inv
         self.api_morg.wait_til_gained_xp("Magic")
         time.sleep(0.15)
         self.set_click_pos()
@@ -125,11 +117,11 @@ class OSRSHIGHALCH(OSRSBot, launcher.Launchable):
 
     def get_spell_location(self) -> Rectangle:
         if not self.spell_location:
+            self.select_magic_tab()
             spell_img = imsearch.BOT_IMAGES.joinpath("spellbooks").joinpath("normal", "high_alchemy.png")
             if spell_img_result := imsearch.search_img_in_rect(spell_img, self.win.control_panel):
                 self.spell_location = spell_img_result
-                slot = self.win.inventory_slots[self.item_index]
-                self.spell_item_rectangle = self.find_overlap_rectangle(self.spell_location, slot)
+                self.item_index, self.spell_item_rectangle = self.find_index_with_max_overlap(self.spell_location)
                 self.set_click_pos(force=True)
         return self.spell_location
 
@@ -144,10 +136,32 @@ class OSRSHIGHALCH(OSRSBot, launcher.Launchable):
             self.log_msg("Out of nature runes")
             self.stop()
 
-    def select_inv(self):
-        self.log_msg("Selecting inventory...")
-        self.mouse.move_to(self.win.cp_tabs[3].random_point())
-        self.mouse.click()
+    def select_inv_tab(self):
+        if not self.puntil.is_control_panel_selected(ControlPanelTab.inventory):
+            self.log_msg("Selecting inventory...")
+            self.mouse.move_to(self.win.cp_tabs[3].random_point())
+            self.mouse.click()
+
+    def select_magic_tab(self):
+        if not self.puntil.is_control_panel_selected(ControlPanelTab.magic):
+            self.mouse.move_to(self.win.cp_tabs[6].random_point())
+            self.mouse.click()
+            time.sleep(.5)
+
+    def find_index_with_max_overlap(self, searchfor: Rectangle) -> tuple[int, Rectangle]:
+        max_overlap_area = 0
+        item_index = -1
+        item_overlap_rectangle: Rectangle | None = None
+
+        for index, slot in enumerate(self.win.inventory_slots):
+            overlap_rect = self.find_overlap_rectangle(searchfor, slot)
+            if overlap_rect:
+                overlap_area = overlap_rect.width * overlap_rect.height
+                if overlap_area > max_overlap_area:
+                    max_overlap_area = overlap_area
+                    item_index = index
+                    item_overlap_rectangle = overlap_rect
+        return item_index, item_overlap_rectangle
 
     def find_overlap_rectangle(self, rect1: Rectangle, rect2: Rectangle) -> Rectangle:
         # Calculate the (left, top) and (right, bottom) for each rectangle

@@ -1,8 +1,10 @@
 import time
 
 import utilities.color as clr
+import utilities.imagesearch as imsearch
 import utilities.random_util as rd
 from model.osrs.osrs_bot import OSRSBot
+from model.osrs.puntil.control_panel_tab import ControlPanelTab
 from utilities.api.morg_http_client import MorgHTTPSocket
 
 
@@ -108,3 +110,18 @@ class PUNTIL:
         self.bot.log_msg(msg)
         self.logout()
         self.bot.stop()
+
+    def is_control_panel_selected(self, tab: ControlPanelTab) -> bool:
+        tab_img = imsearch.BOT_IMAGES.joinpath("interface").joinpath(tab.value + "_selected.png")
+        result = imsearch.search_img_in_rect(tab_img, self.bot.win.control_panel)
+        return result is not None
+
+    def wait_for_selected_tab(self, tab: ControlPanelTab, timeout: int = 10000) -> bool:
+        start_time = time.time()  # Record the start time
+
+        while (time.time() - start_time) * 1000 < timeout:  # Continue until timeout
+            if self.is_control_panel_selected(tab):  # Check if the tab is selected
+                return True
+            time.sleep(0.1)  # Sleep for 100 ms before checking again
+
+        return False  # Return False if timeout is reached before tab is selected
