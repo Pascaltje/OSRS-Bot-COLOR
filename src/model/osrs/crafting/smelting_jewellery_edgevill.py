@@ -29,7 +29,9 @@ class OSRSSmeltingJewelleryEdgeVill(OSRSBot):
         PItem("Gold amulet (u)", ids.GOLD_AMULET_U, "Gold_amulet_(u)", [2357, 1595], ["Gold_bar", "Amulet_mould"]),
         PItem("Gold necklace", ids.GOLD_NECKLACE, "Gold_necklace", [ids.GOLD_BAR, ids.NECKLACE_MOULD], ["Gold_bar", "Necklace_mould"]),
         PItem("Bronze bar", ids.BRONZE_BAR, "Bronze_bar", [ids.COPPER_ORE, ids.TIN_ORE], ["Copper_ore", "Tin_ore"]),
+        PItem("Ruby ring", ids.RUBY_RING, "Ruby_ring", [ids.GOLD_BAR, ids.RUBY, ids.RING_MOULD], ["Gold_bar", "Ruby", "Ring_mould"]),
         PItem("Ruby necklace", ids.RUBY_NECKLACE, "Ruby_necklace", [ids.GOLD_BAR, ids.RUBY, ids.NECKLACE_MOULD], ["Gold_bar", "Ruby", "Necklace_mould"]),
+        PItem("Ruby amulet (u)", ids.RUBY_AMULET_U, "Ruby_amulet_(u)", [ids.GOLD_BAR, ids.RUBY, ids.AMULET_MOULD], ["Gold_bar", "Ruby", "Amulet_mould"]),
         PItem("Diamond necklace", ids.DIAMOND_NECKLACE, "Diamond_necklace", [ids.GOLD_BAR, ids.DIAMOND, ids.NECKLACE_MOULD], ["Gold_bar", "Diamond", "Necklace_mould"]),
         PItem("Emerald Bracelet", ids.EMERALD_BRACELET, "Emerald_bracelet", [ids.GOLD_BAR, ids.EMERALD, ids.BRACELET_MOULD], ["Gold_bar", "Emerald", "Bracelet_mould"]),
 
